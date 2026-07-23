@@ -8,4 +8,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 7860
 
-CMD ["python","app.py"]
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:7860", "app:house_price_api"]

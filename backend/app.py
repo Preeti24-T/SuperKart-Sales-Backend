@@ -2,37 +2,41 @@ from flask import Flask, request, jsonify
 import pandas as pd
 import joblib
 
-# Load the trained model
-model = joblib.load('backend/superkart_v1_0.joblib')
-
 app = Flask(__name__)
+
+model = joblib.load("SuperKart_Sales_Model.pkl")
 
 @app.route("/")
 def home():
-    return {
-        "message": "Welcome to SuperKart Sales Forecast API"
-    }
+    return "Welcome to SuperKart Sales Prediction API"
 
-@app.route("/predict", methods=["POST"])
+@app.route("/v1/customer", methods=["POST"])
 def predict():
-    try:
-        data = request.get_json()
 
-        if not data:
-            return jsonify({"error": "No input data provided"}), 400
+    data = request.get_json()
 
-        # Create a DataFrame from the input data
-        input_df = pd.DataFrame([data])
+    input_df = pd.DataFrame([data])
 
-        # Make prediction
-        prediction = model.predict(input_df)
+    prediction = model.predict(input_df)[0]
 
-        return jsonify({
-            "Predicted Sales": round(float(prediction[0]), 2)
-        })
+    return jsonify({
+        "Predicted Product Store Sales": round(float(prediction),2)
+    })
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
-# Rename app to house_price_api, matching the Dockerfile CMD
-house_price_api = app
+@app.route("/v1/customerbatch", methods=["POST"])
+def batch_predict():
+
+    file = request.files["file"]
+
+    df = pd.read_csv(file)
+
+    predictions = model.predict(df)
+
+    df["Predicted Sales"] = predictions
+
+    return df["Predicted Sales"].to_json()
+
+
+if __name__=="__main__":
+    app.run(host="0.0.0.0",port=7860)

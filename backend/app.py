@@ -1,10 +1,9 @@
-
 from flask import Flask, request, jsonify
 import pandas as pd
 import joblib
 
 # Load the trained model
-model = joblib.load('superkart_v1_0.joblib')
+model = joblib.load('backend/superkart_v1_0.joblib')
 
 app = Flask(__name__)
 
